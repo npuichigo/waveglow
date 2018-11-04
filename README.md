@@ -16,7 +16,6 @@ tar xf cmu_us_slt_arctic-0.95-release.tar.bz2
 ```
 
 3. Extract features: 
-
 feature extracting pipeline is the same as [tacotron](https://github.com/keithito/tacotron)
 
 4. Training with default hyperparams:
