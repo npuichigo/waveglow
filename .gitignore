@@ -1,0 +1,9 @@
+.DS_Store
+*.pyc
+*.pt
+*log
+__pycace__
+*checkpoints
+runs
+*corpus
+train.sh

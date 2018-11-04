@@ -1,0 +1,3 @@
+pytorch>=0.4.1
+soundfile
+tensorboardX
