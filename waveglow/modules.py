@@ -337,7 +337,7 @@ class UpsampleNet(nn.Module):
         super(UpsampleNet, self).__init__()
         self.upsample_factor = upsample_factor
         self.upsample_method = upsample_method
-        self.squeeze_factor = 8
+        self.squeeze_factor = squeeze_factor 
 
         if upsample_method == 'duplicate':
             upsample_factor = int(np.prod(upsample_factor))
