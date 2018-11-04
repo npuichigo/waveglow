@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 # Author: npuichigo@gmail.com (zhangyuchao)
-"""Implementation of the WaveNet model."""
+"""Implementation of the WaveGlow model."""
 
 from __future__ import absolute_import
 from __future__ import division
