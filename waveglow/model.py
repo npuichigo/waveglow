@@ -49,7 +49,7 @@ class WaveGlow(nn.Module):
 
         self.squeeze_factor = squeeze_factor
         self.num_layers = num_layers
-        self.num_scales = int(np.log2(squeeze_factor)) + 1
+        self.num_scales = squeeze_factor // 2
 
         self.squeeze_layer = SqueezeLayer(squeeze_factor)
 
@@ -63,9 +63,10 @@ class WaveGlow(nn.Module):
                          wn_dilation_channels=wn_dilation_channels,
                          wn_skip_channels=wn_skip_channels,
                          local_condition_channels=local_condition_channels))
-            # multi-scale architecture
+            # Use multi-scale architecture to output 2 of the channels
+            # after every 4 coupling layers.
             if (i + 1) % self.num_scales == 0:
-                squeeze_factor //= 2
+                squeeze_factor -= 2
 
     def forward(self, input, logdet, reverse, local_condition):
         if not reverse:
@@ -77,7 +78,7 @@ class WaveGlow(nn.Module):
                                        local_condition=local_condition)
 
                 if (i + 1) % self.num_scales == 0:
-                    early_output, output = output.split(output.size(1) // 2, 1)
+                    early_output, output = output.split([2, output.size(1) - 2], 1)
                     early_outputs.append(early_output)
             early_outputs.append(output)
 
@@ -85,10 +86,10 @@ class WaveGlow(nn.Module):
         else:
             output = input
             for i, layer in enumerate(reversed(self.layers)):
-                curr_input = output[:, -2 ** (i // self.num_scales + 1):, :]
+                curr_input = output[:, -2 * (i // self.num_scales + 2):, :]
                 curr_output, logdet = layer(curr_input, logdet=logdet, reverse=True,
                                             local_condition=local_condition)
-                output[:, -2 ** (i // self.num_scales + 1):, :] = curr_output
+                output[:, -2 * (i // self.num_scales + 2):, :] = curr_output
 
             output, logdet = self.squeeze_layer(output, logdet=logdet, reverse=True)
 
