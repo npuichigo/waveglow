@@ -279,7 +279,7 @@ if __name__ == '__main__':
         '--local_condition_dir',
         type=str,
         default='corpus/mels',
-        help='Directory of audio data.')
+        help='Directory of local condition data.')
     parser.add_argument(
         '--summary_interval',
         type=int,
