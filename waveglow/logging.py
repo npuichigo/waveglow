@@ -22,6 +22,7 @@ import logging as _logging
 import os as _os
 import sys as _sys
 import time as _time
+import traceback as _traceback
 from logging import DEBUG
 from logging import ERROR
 from logging import FATAL
@@ -33,6 +34,42 @@ import threading
 # Don't use this directly. Use _get_logger() instead.
 _logger = None
 _logger_lock = threading.Lock()
+
+
+def _get_caller(offset=3):
+    """Returns a code and frame object for the lowest non-logging stack frame."""
+    # Use sys._getframe().  This avoids creating a traceback object.
+    # pylint: disable=protected-access
+    f = _sys._getframe(offset)
+    # pylint: enable=protected-access
+    our_file = f.f_code.co_filename
+    f = f.f_back
+    while f:
+        code = f.f_code
+        if code.co_filename != our_file:
+            return code, f
+        f = f.f_back
+    return None, None
+
+
+# The definition of `findCaller` changed in Python 3.2
+if _sys.version_info.major >= 3 and _sys.version_info.minor >= 2:
+    def _logger_find_caller(stack_info=False):  # pylint: disable=g-wrong-blank-lines
+        code, frame = _get_caller(4)
+        sinfo = None
+        if stack_info:
+            sinfo = '\n'.join(_traceback.format_stack())
+        if code:
+            return (code.co_filename, frame.f_lineno, code.co_name, sinfo)
+        else:
+            return '(unknown file)', 0, '(unknown function)', sinfo
+else:
+    def _logger_find_caller():  # pylint: disable=g-wrong-blank-lines
+        code, frame = _get_caller(4)
+        if code:
+            return (code.co_filename, frame.f_lineno, code.co_name)
+        else:
+            return '(unknown file)', 0, '(unknown function)'
 
 
 def _get_logger():
@@ -162,6 +199,14 @@ def log_if(level, msg, condition, *args):
     """Log 'msg % args' at level 'level' only if condition is fulfilled."""
     if condition:
         vlog(level, msg, *args)
+
+
+def _GetFileAndLine():
+    """Returns (filename, linenumber) for the stack frame."""
+    code, f = _get_caller()
+    if not code:
+        return ('<unknown>', 0)
+    return (code.co_filename, f.f_lineno)
 
 
 def get_verbosity():
