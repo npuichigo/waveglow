@@ -29,5 +29,5 @@ python generate.py --checkpoint=/path/to/model --local_condition_file=/path/to/l
 ```
 
 ## Notes:
-  * This is not offical implementation, some details are not necessarily correct.
+  * This is not official implementation, some details are not necessarily correct.
   * Work in progress.
